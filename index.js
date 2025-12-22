@@ -11,7 +11,7 @@ webpush.setVapidDetails(
   VAPID_PRIVATE
 );
 
-// 🗄️ MYSQL
+// 🗄️ BD
 const db = await mysql.createPool({
   host: "localhost",          // o host de HostGator
   user: "fjdlgkte_trareysa",
@@ -21,51 +21,52 @@ const db = await mysql.createPool({
 
 console.log("Servidor push iniciado");
 
-// 🔁 LOOP AUTOMÁTICO
-async function checkNewTickets() {
+// 🔁 POLLING
+setInterval(async () => {
   try {
+    // 1️⃣ Buscar tickets nuevos
     const [tickets] = await db.query(
       "SELECT id, titulo FROM tickets WHERE push_sent = 0"
     );
 
     if (!tickets.length) return;
 
+    // 2️⃣ Obtener suscripciones
     const [subs] = await db.query(
       "SELECT endpoint, p256dh, auth FROM push_subscriptions"
     );
 
     if (!subs.length) return;
 
-    for (const ticket of tickets) {
+    // 3️⃣ Enviar push
+    for (const t of tickets) {
       const payload = JSON.stringify({
         title: "Nuevo ticket",
-        body: ticket.titulo
+        body: t.titulo
       });
 
       for (const s of subs) {
-        const subscription = {
+        await webpush.sendNotification({
           endpoint: s.endpoint,
           keys: {
             p256dh: s.p256dh,
             auth: s.auth
           }
-        };
-
-        await webpush.sendNotification(subscription, payload)
-          .catch(err => console.error("Push error:", err.message));
+        }, payload).catch(err => {
+          console.error("Push error:", err.message);
+        });
       }
 
+      // 4️⃣ Marcar como enviado
       await db.query(
         "UPDATE tickets SET push_sent = 1 WHERE id = ?",
-        [ticket.id]
+        [t.id]
       );
+
+      console.log("Push enviado para ticket", t.id);
     }
 
-    console.log("Push enviados correctamente");
   } catch (e) {
-    console.error("Error loop:", e.message);
+    console.error("Error polling:", e.message);
   }
-}
-
-// ⏱️ cada 10 segundos
-setInterval(checkNewTickets, 10000);
+}, 10000);

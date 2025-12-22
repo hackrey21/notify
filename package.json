@@ -1,0 +1,17 @@
+{
+  "name": "push-server",
+  "version": "1.0.0",
+  "description": "Servidor de notificaciones push",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.2.1",
+    "web-push": "^3.6.7"
+  }
+}

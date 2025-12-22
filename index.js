@@ -5,18 +5,26 @@ import webpush from "web-push";
 const app = express();
 app.use(express.json());
 
+// 🔑 VAPID DIRECTO
+const VAPID_PUBLIC = "BPJRz8iTuGNK09A8zriSsXJMD1PCpbq_WvtpUQwRjz-GjXH16qNE3y0hLXzc5ogHLgODWHN7UR3Dpn4rN_B2ikM";
+const VAPID_PRIVATE = "PKyg0KfggHNhl4-rKb39pXn_RALNgWETvr5TmZwoNgo";
+
 webpush.setVapidDetails(
   "mailto:soporte@tudominio.com",
-  process.env.VAPID_PUBLIC,
-  process.env.VAPID_PRIVATE
+  VAPID_PUBLIC,
+  VAPID_PRIVATE
 );
 
 const db = await mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_NAME
+  host: "localhost",          // o host de HostGator
+  user: "fjdlgkte_trareysa",
+  password: "Trareysa3691132",
+  database: "fjdlgkte_demo",
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
+
 
 async function checkNewTickets() {
   const [tickets] = await db.query(
@@ -54,3 +62,4 @@ async function checkNewTickets() {
 setInterval(checkNewTickets, 10000);
 
 app.listen(process.env.PORT || 3000);
+

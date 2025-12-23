@@ -13,10 +13,13 @@ webpush.setVapidDetails(
 
 // 🗄️ BD
 const db = await mysql.createPool({
-  host: "localhost",          // o host de HostGator
+  host: "108.167.143.218",
   user: "fjdlgkte_trareysa",
   password: "Trareysa3691132",
   database: "fjdlgkte_demo",
+  port: 3306,
+  waitForConnections: true,
+  connectionLimit: 10
 });
 
 console.log("Servidor push iniciado");
@@ -70,3 +73,4 @@ setInterval(async () => {
     console.error("Error polling:", e.message);
   }
 }, 10000);
+
